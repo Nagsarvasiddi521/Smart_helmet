@@ -1,0 +1,46 @@
+                                                                  Smart_helmet code
+
+#include <Wire.h>
+#include <MPU6050.h>
+
+const int TRIGGER_PIN = 2;
+const int ECHO_PIN = 3;
+const int LED_PIN = 13;
+
+MPU6050 mpu;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(TRIGGER_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT);
+
+  digitalWrite(TRIGGER_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIGGER_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIGGER_PIN, LOW);
+
+  mpu.initialize();
+  mpu.setDMPEnabled(true);
+}
+
+void loop() {
+  // Ultrasonic Sensor
+  long duration = pulseIn(ECHO_PIN, HIGH);
+  float distance = duration * 0.034 / 2;
+    // MPU6050
+  int16_t ax, ay, az, gx, gy, gz;
+  mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+
+  // Check if helmet is present
+  if (distance < 30 && az > 1000) { // Adjust the values as per your requirements
+    digitalWrite(LED_PIN, HIGH);
+    Serial.println("Helmet detected!");
+  } else {
+    digitalWrite(LED_PIN, LOW);
+    Serial.println("Helmet not detected!");
+  }
+
+  delay(500); // Adjust the delay time as needed
+}
